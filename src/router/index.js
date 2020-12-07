@@ -15,5 +15,10 @@ export default new Router({
       name: 'moveUpList',
       component: () => import('@/views/moveUpList'),
     },
+    {
+      path: '/dragUpList',
+      name: 'dragUpList',
+      component: () => import('@/views/dragUpList'),
+    },
   ]
 })

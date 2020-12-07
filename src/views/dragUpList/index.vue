@@ -1,7 +1,10 @@
 <template>
   <div>
-    <h1>列表上移下移</h1>
-    <el-table :data="gridData">
+    <h1>列表拖拽上移下移</h1>
+    <el-table :data="gridData" ref="singleTable"
+              size="small"
+              :row-style="{height:'52px'}"
+              row-key="id">
       <el-table-column label="字段名称" property="fieldName"></el-table-column>
       <el-table-column label="字段顺序" property="fieldOrder"></el-table-column>
       <el-table-column label="是否展示" property="state">
@@ -17,8 +20,7 @@
       </el-table-column>
       <el-table-column label="操作" property="address">
         <template slot-scope="scope">
-          <el-button @click="upMove(scope)" size="small" type="text" v-if="scope.row.upMove">上移</el-button>
-          <el-button @click="downMove(scope)" size="small" type="text" v-if="scope.row.downMove">下移</el-button>
+          <span style="font-size:14px;"><div class="menu-icon"></div></span>
         </template>
       </el-table-column>
     </el-table>
@@ -27,6 +29,8 @@
 </template>
 
 <script>
+  import Sortable from "sortablejs";
+
   export default {
     name: "index",
     data() {
@@ -296,11 +300,11 @@
       }
     },
     mounted() {
+      this.dragSort()
       this.init()
     },
     methods: {
       init() {
-        // 上下移初始化 对原有数据添加标识
         this.gridData.forEach((item, index, array) => {
           item.upMove = true
           item.downMove = true
@@ -312,71 +316,63 @@
           item.state = !!item.state
         })
       },
-      fieldStatus(status) {
-        console.log('status', status)
-      },
-      //上移
-      upMove(scope) {
-        this.gridData.forEach((item, index, array) => {
-          if (index === scope.$index) {
-            if (index === 0) {
-              return
+      //拖拽
+      dragSort() {
+        setTimeout(() => {
+          const el = this.$refs.singleTable.$el.querySelectorAll('.el-table__body-wrapper > table > tbody')[0]
+          this.sortable = Sortable.create(el, {
+            animation: 150, // ms, number 单位：ms，定义排序动画的时间
+            ghostClass: 'blue-background-class',
+            setData: function (dataTransfer) {
+              dataTransfer.setData('Text', '')
+            },
+            onEnd: e => {
+              //e.oldIndex为拖动一行原来的位置，e.newIndex为拖动后新的位置
+              const targetRow = this.gridData.splice(e.oldIndex, 1)[0];
+              this.gridData.splice(e.newIndex, 0, targetRow);
+              let dragId = this.gridData[e.newIndex].id;//拖动行的id
+              let oneId, twoId
+              //拖动行的前一行
+              if (this.gridData[e.newIndex - 1]) {
+                oneId = this.gridData[e.newIndex - 1].id;
+              } else {
+                oneId = ""
+              }
+              //拖动行的后一行
+              if (this.gridData[e.newIndex + 1]) {
+                twoId = this.gridData[e.newIndex + 1].id;
+              } else {
+                twoId = ""
+              }
             }
-            //在上一项插入该项
-            this.gridData.splice(index - 1, 0, (this.gridData[index]))
-            this.gridData[index].upMove = true
-            this.gridData[index - 1].downMove = true
-
-            // /删除后一项
-            this.gridData.splice(index + 1, 1)
-            this.gridData[0].upMove = false
-          }
-        })
-        this.gridData.forEach((item, index, array) => { //最后一项的上移处理
-          if (index === scope.$index) {
-            if (index === (this.gridData.length - 1)) {
-              this.gridData[index].downMove = false
-            }
-          }
-        })
-      },
-      //下移
-      downMove(scope) {
-        this.gridData.forEach((item, index, array) => {
-          if (index === scope.$index) {
-            if (index === (this.gridData.length - 1)) {
-              return
-            }
-            // 在下一项插入该项
-            this.gridData.splice(index + 2, 0, (this.gridData[index]))
-            this.gridData[index].upMove = true
-            // 删除前一项
-            this.gridData.splice(index, 1)
-            this.gridData[index].downMove = true
-            this.gridData[this.gridData.length - 1].downMove = false
-            this.gridData[0].upMove = false
-          }
-        })
+          })
+        }, 0)
       },
       //保存字段
       saveField() {
         return
         this.gridData.forEach((item, index) => {
+          delete item.upMove
+          delete item.downMove
+          delete item.createTime
+          delete item.id
+          delete item.userid
           if (item.state) {
             item.state = 1
           } else {
             item.state = 0
           }
+
           //向后端传顺序处理
           item.fieldOrder = index + 1
         })
         const customizationArr = []
-        this.gridData.forEach((item) => {
+        this.gridData.forEach(item => {
           customizationArr.push(item)
         })
         console.log('移动后的数据',customizationArr);
         //发送接口
-        // customization(customizationArr).then((res) => {
+        // customization(customizationArr).then(res => {
         //   this.gridData.forEach((item, index) => {
         //     if (item.state === 1) {
         //       item.active = true
@@ -384,10 +380,24 @@
         //   })
         // })
       },
+      fieldStatus(status) {
+        console.log('status', status)
+      },
     }
   }
 </script>
 
 <style scoped>
 
+  .menu-icon {
+    width: 25px;
+    height: 19px;
+    border-top: 3px solid #ccc;
+    border-bottom: 3px solid #ccc;
+    background-color: #ccc;
+    padding: 5px 0;
+    background-clip: content-box;
+    /*border-top-left-radius: 4px;*/
+    /*border-bottom-left-radius: 4px;*/
+  }
 </style>
