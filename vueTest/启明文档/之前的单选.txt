@@ -1,0 +1,40 @@
+                 <el-checkbox-group size="mini" v-model="limitedValue">
+                                  <div>
+                                    <el-checkbox :label="0" border>招标公告</el-checkbox>
+                                    <el-checkbox :label="1" border>招标预告</el-checkbox>
+                                    <el-checkbox :label="2" border>招标变更</el-checkbox>
+                                    <el-checkbox :label="31" border>流标/废标公示</el-checkbox>
+                                    <el-checkbox :label="32" border>候选人公示</el-checkbox>
+                                  </div>
+                                  <div style="margin-top: 10px">
+                                    <!--                  这是为了占位-->
+                                    <div class="keywordHeader" style="visibility: hidden">
+                                      <span class="TimeItemSpan">信息类型</span>
+                                    </div>
+                                    <el-checkbox :label="33" border>中标结果</el-checkbox>
+                                    <el-checkbox :label="34" border>合同公告</el-checkbox>
+                                    <el-checkbox :label="35" border>验收合同</el-checkbox>
+                                    <el-checkbox :label="36" border>违规公告</el-checkbox>
+                                    <el-checkbox :label="9000" border>舆情</el-checkbox>
+                                    <el-checkbox :label="37" border>其他公告</el-checkbox>
+                                    <div class="matchingServe">
+                                      <!-- 高级查询-->
+                                      <el-button
+                                        @click="advanced"
+                                        size="small"
+                                        type="primary"
+                                        v-show="this.advancedFilter"
+                                      >查询
+                                      </el-button>
+                                      <!-- 智能查询-->
+                                      <el-button
+                                        @click="capacity"
+                                        size="small"
+                                        type="primary"
+                                        v-show="!this.advancedFilter"
+                                      >查询
+                                      </el-button>
+                                      <el-button @click="reset" size="small">重置</el-button>
+                                    </div>
+                                  </div>
+                                </el-checkbox-group>

@@ -1,0 +1,514 @@
+<template>
+  <div class="login">
+    <div v-if="jurisdictionData == 1" class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image" alt="">
+        </div>
+        <div class="text">
+          <div>对不起，您暂未开通启明系统用户权限，如有需要，请点击下方按钮进行申请，您的申请将通过直属总监进行审批.</div>
+          <el-button @click="dialogFormVisible = true" type="primary" size="medium">去申请</el-button>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="jurisdictionData == 2" class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image2" alt="">
+        </div>
+        <div class="text">
+          <div>您的权限申请正在由直属总监审核中，审核结果将通过邮件通知到您，请您耐心等待！</div>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="jurisdictionData == 3" class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image" alt="">
+        </div>
+        <div class="text">
+          <div>对不起，您的用户权限已过期，如需重新申请开通，请点击下方按钮进行申请，您的申请将通过直属总监进行审批.</div>
+          <el-button @click="dialogFormVisible = true" type="primary" size="medium">去申请</el-button>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="jurisdictionData == 4" class="jurisdictionBoxIpnoe">
+      <div class="jurisdictionContent">
+        <img style="width: 100%;" :src="image" alt="">
+      </div>
+      <div class="text">
+        <p>
+          &nbsp;&nbsp;&nbsp;&nbsp; 对不起，您暂未开通启明系统用户权限，如有需要，请点击下方按钮进行申请，您的申请将通过直属总监进行审批.
+        </p>
+        <el-button @click="dialogFormVisible = true" style="margin-top: 10px" type="primary" size="medium">去申请
+        </el-button>
+      </div>
+    </div>
+    <div v-else-if="jurisdictionData == 5" class="jurisdictionBoxIpnoe">
+      <div class="jurisdictionContent">
+        <img style="width: 100%;" :src="image2" alt="">
+      </div>
+      <div class="text">
+        <p>
+          &nbsp;&nbsp;&nbsp;&nbsp; 您的权限申请正在由直属总监审核中，审核结果将通过邮件通知到您，请您耐心等待！
+        </p>
+        <el-button @click="dialogFormVisible = true" style="margin-top: 10px" type="primary" size="medium">去申请
+        </el-button>
+      </div>
+    </div>
+    <div v-else-if="jurisdictionData == 6" class="jurisdictionBoxIpnoe">
+      <div class="text">
+        <p>
+          &nbsp;&nbsp;&nbsp;&nbsp; 对不起，您的用户权限已过期，如需重新申请开通，请点击下方按钮进行申请，您的申请将通过直属总监进行审批.
+        </p>
+        <el-button @click="dialogFormVisible = true" style="margin-top: 10px" type="primary" size="medium">去申请
+        </el-button>
+      </div>
+      <div class="jurisdictionContent">
+        <img style="width: 100%;" :src="image" alt="">
+      </div>
+    </div>
+    <div v-else class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image" alt="">
+        </div>
+        <div class="text">
+          <div>登录状态已失效，请重新登录： <a href="//qiming.oa.com" style="color: blue;">启明大数据商情系统</a>
+            <h3 style="font-size: 16px;margin-bottom: 40px">温馨提示：建议先清空浏览器cookies,再点击登录。</h3>
+          </div>
+          <el-button type="primary" size="medium" @click="remoCookies">点这里清空cookies</el-button>
+        </div>
+      </div>
+    </div>
+
+    <el-dialog title="" :append-to-body='true' :close-on-click-modal='false'  :width="isIphoneWidth" :visible.sync="dialogFormVisible">
+      <el-form :model="form">
+        <div class="item" v-show="csigState === false">
+          <p>系统浏览权限</p>
+          <el-form-item label="系统使用截止日期" label-width="125px">
+            <el-date-picker
+              is-range
+              :picker-options="pickerOptions"
+              v-model="form.sysEndTime"
+              type="date"
+              placeholder="选择日期">
+            </el-date-picker>
+          </el-form-item>
+        </div>
+
+        <div class="item">
+          <p>数据下载权限</p>
+          <div class="item_aims">
+            <el-form-item label="数据下载截止日期" label-width="125px">
+              <el-date-picker
+                is-range
+                :picker-options="pickerOptions"
+                v-model="form.dataEndTime"
+                type="date"
+                placeholder="选择日期">
+              </el-date-picker>
+            </el-form-item>
+
+            <el-form-item label-width="125px"></el-form-item>
+
+            <el-form-item label="行业" label-width="125px">
+              <el-cascader-multi
+                :clearable="true"
+                :data="departOptions"
+                :is-two-dimension-value="false"
+                @change="industryChange"
+                children-key="child"
+                class="filter-item"
+                collapse-tags
+                label-key="name"
+                placeholder="请选择行业"
+                separator="/"
+                size="mini"
+                v-model="industry"
+                value-key="name"/>
+            </el-form-item>
+
+            <el-form-item label="地区" label-width="125px">
+              <el-cascader-multi
+                :clearable="true"
+                :data="regionOptionsArr"
+                :is-two-dimension-value="false"
+                @change="handleChange"
+                class="filter-item"
+                collapse-tags
+                label-key="areaName"
+                placeholder="请选择地区"
+                separator="/"
+                size="mini"
+                v-model="zone"
+                value-key="areaName"
+              />
+            </el-form-item>
+          </div>
+        </div>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="requestAccess">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!--  底部  -->
+    <div v-if="$store.state.settings.showFooter" id="el-login-footer">
+      <span v-html="$store.state.settings.footerTxt"/>
+      <span> : </span>
+      <a href="http://www.beian.miit.gov.cn" target="_blank">{{ $store.state.settings.caseNumber }}</a>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@/router/routers'
+import Cookies from 'js-cookie'
+import image1 from '@/assets/401_images/401.png'
+import image2 from '@/assets/401_images/401.svg'
+import { getInfo } from '@/api/login'
+import { getUserDataPer } from '@/api/center'
+import industryJson from '@/JSON/industry.json'
+import axios from 'axios'
+import regionJson from '@/JSON/regionJson.json'
+
+export default {
+  name: 'login_401',
+  data() {
+    return {
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 8.64e7//设置选择今天以及今天之后的日
+          //return time.getTime() > Date.now(); //设置选择今天以及今天以前的日期
+          // return time.getTime() < Date.now();//设置选择今天之后的日期（不能选择当天时间）
+          // return time.getTime() > Date.now() - 8.64e7 //设置选择今天之前的日期（不能选择当天）
+          // 设置当天23：59：59可选
+          // let currentTime = this.getNowMonthDay() + ` 23:59:59`
+          // return time.getTime() > new Date(currentTime).getTime()
+        },
+      },
+      dialogFormVisible: false,
+      regionOptionsArr: [],
+      zone: [],
+      departOptions: [],
+      industry: [],
+      csigState: false,
+      form: {},
+      isIphone: Boolean,
+      image: image1,
+      image2: image2,
+      loading: false,
+      redirect: undefined,
+      jurisdictionData: Number,
+
+      username: '',
+      password: '',
+      code: '',
+      codeUrl: '',
+      uuid: '',
+    }
+  },
+  watch: {
+    $route: {
+      handler: function (route) {
+        this.redirect = route.query && route.query.redirect
+      },
+      immediate: true
+    }
+  },
+  computed: {
+    isIphoneWidth: function () {
+      return this.isIphone ? '90%' : '50%'
+    }
+  },
+  mounted() {
+    this.init()
+    this.getIndustryList()
+    if (
+      navigator.userAgent
+        .toLowerCase()
+        .match(
+          /(ipod|iphone|android|coolpad|mmp|smartphone|midp|wap|xoom|symbian|j2me|blackberry|wince)/i
+        ) != null
+    ){
+      this.isIphone = true
+    }else {
+      this.isIphone = false
+    }
+    getInfo().then(res => {
+      if (parseInt(res.username.split('=')[1]) == 1) {
+        if (this.isIphone){
+          this.jurisdictionData = 4
+        }else {
+          this.jurisdictionData = 1
+        }
+        return
+      } else if (parseInt(res.username.split('=')[1]) == 2) {
+        if (this.isIphone){
+          this.jurisdictionData = 5
+        }else {
+          this.jurisdictionData = 2
+        }
+        return
+      } else if (parseInt(res.username.split('=')[1]) == 3) {
+        if (this.isIphone){
+          this.jurisdictionData = 6
+        }else {
+          this.jurisdictionData = 3
+        }
+        return
+      }
+    })
+      .catch(err => {
+        console.log('errerr', err)
+      })
+  },
+  methods: {
+    init() {
+      getUserDataPer().then(res => {
+        this.csigState = res.csigState
+        this.dataEndTime = res.dataEndTime
+        if (res.deptDataPermission) this.deptDataPermission = JSON.parse(res.deptDataPermission)
+        this.sysEndTime = res.sysEndTime
+        if (res.userDataPermission) this.userDataPermission = JSON.parse(res.userDataPermission)
+      })
+    },
+    remoCookies() {
+      Cookies.remove('EL-ADMIN-TOEKN')
+    },
+    // 获取行业列表接口
+    async getIndustryList(n = '') {
+      industryJson.result.forEach(item=>{
+          if (item.id == 0){
+            item.child.push({ id: -1, name: "全部行业" })
+          }
+        })
+        this.departOptions = industryJson.result
+    },
+
+    // 级联变化监听
+    handleChange(e) {
+      if (e.value.includes('全国') && e.value.length > 1) {
+        if (e.value.indexOf('全国') === 0) {
+          e.value.shift()
+          this.zone = e.value
+        }
+        if (e.value.indexOf('全国') > 0) {
+          this.zone = ['全国']
+        }
+      }
+    },
+    industryChange(e) {
+      if (e.value.includes('全部行业') && e.value.length > 1) {
+        if (e.value.indexOf('全部行业') === 0) {
+          e.value.shift()
+          this.industry = e.value
+        }
+        if (e.value.indexOf('全部行业') > 0) {
+          this.industry = ['全部行业']
+        }
+      }
+      const selectIndustry = Array.from(new Set(e.nodes.map(item => item.parentShowLabel)))
+      this.cloneIndustryParent = selectIndustry.join(',') || ''
+    },
+    requestAccess() {
+      let industry = this.industry.join(',') === '全部行业' ? '全部' : this.industry.join(',') === '' ? '' : this.industry.join(',')
+      let province = ''
+      if (this.zone.length == 0) {
+        province = ''
+      } else if (this.zone[0] == '全国') {
+        province = '全部'
+      } else {
+        province = this.zone.toString()
+      }
+      let params = {
+        industry,
+        province,
+        dataEndTime: this.form.dataEndTime,
+        sysEndTime: this.form.sysEndTime,
+      }
+
+      if (industry === '' && province === '') {
+        this.$message({
+          message: '行业和地区不能都为空',
+          type: 'warning'
+        })
+        return false
+      }
+
+      if (this.csigState === false && this.form.sysEndTime == '') {
+        this.$message({
+          message: '请选择系统截止时间',
+          type: 'warning'
+        })
+        return false
+      }
+      this.loading = true
+      axios({
+        method: 'post',
+        url: `//qiming.oa.com/qiming/createApproval`,
+        data: params,
+      }).then(res => {
+         this.loading = false
+          this.dialogFormVisible = false
+        if (res.status === 200) {
+          this.$message({
+            message: res.data,
+            duration: 2000
+          })
+        }
+      })
+  .catch(err=>{
+          console.log(err);
+          this.loading = false
+          this.dialogFormVisible = false
+        })
+    },
+    // 获取地区列表接口
+    async getRegion() {
+      this.regionOptions = regionJson.result
+      this.regionOptionsArr = []
+      this.regionOptions.forEach((item) => {
+        this.regionOptionsArr.push({ areaName: item.areaName })
+      })
+    },
+  }
+}
+</script>
+
+<style rel="stylesheet/scss" lang="scss">
+  @import "@/styles/functions.scss";
+  .el-dialog__body {
+    .item {
+      .el-input {
+        width: 100%;
+      }
+    }
+  }
+  /deep/ .el-form {
+    /deep/ .el-input__inner {
+      height: 35px !important;
+    }
+
+    .item {
+      p {
+        color: #000000;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .item_aims {
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
+  }
+  /deep/ .el-form-item {
+    width: 50%;
+  }
+  .dialog-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .error-tip {
+    h2 {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+
+  .login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    // background-image:url(	https://docs-1255840532.cos.ap-shanghai.myqcloud.com/3968.jpg );
+    background-size: cover;
+  }
+
+  .login-form {
+    border-radius: 6px;
+    background: #ffffff;
+    // width: 400px;
+    padding: 25px 25px 5px 25px;
+    margin-bottom: 20%;
+
+    .el-input {
+      height: 38px;
+
+      input {
+        height: 38px;
+      }
+    }
+
+    .input-icon {
+      height: 39px;
+      width: 14px;
+      margin-left: 2px;
+    }
+  }
+
+  .jurisdictionBox {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .jurisdictionContent {
+      position: absolute;
+      left: 15%;
+      top: 30%;
+      width: 70%;
+      height: 300px;
+      display: flex;
+      justify-content: space-between;
+
+      .image {
+        width: 300px;
+        height: 300px;
+      }
+
+      .text {
+        flex: 1;
+        height: 300px;
+        padding: 50px;
+
+        div {
+          font-size: 23px;
+          line-height: 3;
+        }
+      }
+    }
+  }
+
+
+  .jurisdictionBoxIpnoe {
+    .jurisdictionContent {
+      width: 50%;
+      height: 50%;
+      margin: 0 auto;
+    }
+
+    .text {
+      font-size: rem(15);
+      padding: rem(14);
+      line-height: 2;
+      text-align: center;
+
+      p {
+        text-align: left;
+      }
+    }
+  }
+</style>

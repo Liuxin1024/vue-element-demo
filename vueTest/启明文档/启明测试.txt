@@ -1,0 +1,208 @@
+<template>
+  <div class="login">
+
+    <div>
+      <el-input v-model="username" type="text" auto-complete="off" placeholder="账号">
+        <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon"/>
+      </el-input>
+      <el-input v-model="password" type="text" auto-complete="off" placeholder="密码">
+        <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon"/>
+      </el-input>
+      <el-input v-model="code" auto-complete="off" placeholder="验证码" style="width: 63%"
+                @keyup.enter.native="handleLogin">
+        <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon"/>
+      </el-input>
+      <div class="login-code">
+        <img :src="codeUrl" @click="getCode">
+      </div>
+      <el-button type="primary" size="medium" @click="jurisdictionJump">登录</el-button>
+    </div>
+
+    <div v-if="jurisdictionData == 1" class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image" alt="">
+        </div>
+        <div class="text">
+          <div>对不起，您暂未开通启明系统用户权限，如有需要，请点击下方按钮进行申请，您的申请将通过直属总监进行审批.</div>
+          <el-button type="primary" size="medium">去申请</el-button>
+        </div>
+      </div>
+    </div>
+
+
+    <div v-else-if="jurisdictionData == 2" class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image2" alt="">
+        </div>
+        <div class="text">
+          <div>您的权限申请正在由直属总监审核中，审核结果将通过邮件通知到您，请您耐心等待！</div>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="jurisdictionData == 3" class="jurisdictionBox">
+      <div class="jurisdictionContent">
+        <div class="image">
+          <img style="width: 100%;" :src="image" alt="">
+        </div>
+        <div class="text">
+          <div>对不起，您的用户权限已过期，如需重新申请开通，请点击下方按钮进行申请，您的申请将通过直属总监进行审批.</div>
+          <el-button type="primary" size="medium">去申请</el-button>
+        </div>
+      </div>
+    </div>
+    <div v-else class="jurisdictionBox">
+      <div>
+      </div>
+    </div>
+    <!--  底部  -->
+    <div v-if="$store.state.settings.showFooter" id="el-login-footer">
+      <span v-html="$store.state.settings.footerTxt"/>
+      <span> : </span>
+      <a href="http://www.beian.miit.gov.cn" target="_blank">{{ $store.state.settings.caseNumber }}</a>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@/router/routers'
+import Cookies from 'js-cookie'
+import image1 from '@/assets/401_images/401.png'
+import image2 from '@/assets/401_images/401.svg'
+import { getCodeImg, login } from '@/api/login'
+
+export default {
+  name: 'login_401',
+  data() {
+    return {
+      image: image1,
+      image2: image2,
+      loading: false,
+      redirect: undefined,
+      jurisdictionData: Number,
+
+      username: '',
+      password: '',
+      code: '',
+      codeUrl: '',
+      uuid: '',
+    }
+  },
+  watch: {
+    $route: {
+      handler: function (route) {
+        this.redirect = route.query && route.query.redirect
+      },
+      immediate: true
+    }
+  },
+  mounted() {
+    this.getCode()
+  },
+  methods: {
+    getCode() {
+      getCodeImg().then(res => {
+        this.codeUrl = 'data:image/gif;base64,' + res.img
+        this.uuid = res.uuid
+      })
+    },
+    jurisdictionJump() {
+      login(this.username, this.password, this.code, this.uuid).then(res => {
+        if (parseInt(res.user.username.split('=')[1]) == 1) {
+          this.jurisdictionData = 1
+          return
+        } else if (parseInt(res.user.username.split('=')[1]) == 2) {
+          this.jurisdictionData = 2
+          return
+        } else if (parseInt(res.user.username.split('=')[1]) == 3) {
+          this.jurisdictionData = 3
+          return
+        }
+        this.$router.push({ path: this.redirect || '/' })
+      })
+        .catch(err => {
+        })
+    },
+  }
+}
+</script>
+
+<style rel="stylesheet/scss" lang="scss">
+  .error-tip {
+    h2 {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+
+  .login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    // background-image:url(	https://docs-1255840532.cos.ap-shanghai.myqcloud.com/3968.jpg );
+    background-size: cover;
+  }
+
+  .login-form {
+    border-radius: 6px;
+    background: #ffffff;
+    // width: 400px;
+    padding: 25px 25px 5px 25px;
+    margin-bottom: 20%;
+
+    .el-input {
+      height: 38px;
+
+      input {
+        height: 38px;
+      }
+    }
+
+    .input-icon {
+      height: 39px;
+      width: 14px;
+      margin-left: 2px;
+    }
+  }
+
+  .jurisdictionBox {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .jurisdictionContent {
+      position: absolute;
+      left: 15%;
+      top: 30%;
+      width: 70%;
+      height: 300px;
+      display: flex;
+      justify-content: space-between;
+
+      .image {
+        width: 300px;
+        height: 300px;
+      }
+
+      .text {
+        flex: 1;
+        height: 300px;
+        padding: 50px;
+
+        div {
+          font-size: 23px;
+          line-height: 3;
+        }
+      }
+    }
+  }
+
+</style>

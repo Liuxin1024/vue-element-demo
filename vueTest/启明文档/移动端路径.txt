@@ -1,0 +1,14 @@
+首页 ： /mobile/views/home
+上下游分析：/mobile/views/upDownSteam
+市场与机会分析：/mobile/views/customerAnalysis
+区域分析：/mobile/views/regionAnalysis
+行业分析：/mobile/views/instustryAnalysis
+客户分析：/mobile/views/biAnalysis
+泛ICT数据查询：/mobile/views/ictContent
+我的订阅：/mobile/views/mySubscription
+千里马搜索：/mobile/views/QLMsearch
+综合市场分析：/mobile/views/analysisSynthesis
+
+区域分析： /mobile/views/regionAnalysis/modules/checkRegMore
+行业分析：/mobile/views/instustryAnalysis/modules/checkMore
+TOP企业分析: /mobile/views/topEnterprise

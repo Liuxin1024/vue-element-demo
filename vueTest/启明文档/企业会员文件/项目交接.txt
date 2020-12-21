@@ -1,0 +1,3 @@
+git@git.zb.qianlima.com:website/frontend/web_qlmdatacustom.git
+
+前端git 地址   有2个分支，一个是英泰 ，一个是邮电
